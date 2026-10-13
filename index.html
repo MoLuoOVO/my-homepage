@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>左恩东 // 个人终端</title>
+  <meta name="description" content="左恩东的个人主页 —— 一座关于代码、AI 与探索欲的个人终端。" />
+
+  <!-- 字体：英文/数字用 JetBrains Mono，中文走系统雅黑/苹方，断网也不崩 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ============ 开机自检画面（终端式启动） ============ -->
+  <div class="boot" id="boot" aria-hidden="true">
+    <pre class="boot-logo">
+ ███████╗███╗   ██╗██████╗
+ ╚══███╔╝████╗  ██║██╔══██╗
+   ███╔╝ ██╔██╗ ██║██║  ██║
+  ███╔╝  ██║╚██╗██║██║  ██║
+  ███████╗██║ ╚████║██████╔╝
+  ╚══════╝╚═╝  ╚═══╝╚═════╝
+    </pre>
+    <div class="boot-log" id="bootLog"></div>
+    <div class="boot-hint">[ 点击或按任意键跳过 ]</div>
+  </div>
+
+  <!-- ============ 动态神经网络背景（Canvas） ============ -->
+  <canvas class="net-bg" id="netBg" aria-hidden="true"></canvas>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <!-- ============ 鼠标轨迹粒子 / 点击涟漪（最上层，不拦截点击） ============ -->
+  <canvas class="cursor-fx" id="cursorFx" aria-hidden="true"></canvas>
+
+  <!-- ============ 左侧导航栏（桌面固定 / 窄屏抽屉） ============ -->
+  <aside class="sidebar" id="sidebar" aria-label="站内导航">
+    <a class="side-brand" href="#home">
+      <img class="side-avatar" src="assets/avatar.jpg" alt="左恩东的头像" width="800" height="800" />
+      <span class="side-brand-text">
+        <b>左恩东<span class="brand-dot">::</span>终端</b>
+        <small><i class="led"></i> SYS::ONLINE</small>
+      </span>
+    </a>
+
+    <p class="side-label">// 导航 · NAV</p>
+    <nav class="side-nav">
+      <a href="#home"     class="side-link cur"><span class="sl-no">01</span><span class="sl-txt">首页</span><span class="sl-cur">▋</span></a>
+      <a href="#about"    class="side-link"><span class="sl-no">02</span><span class="sl-txt">关于</span><span class="sl-cur">▋</span></a>
+      <a href="#stack"    class="side-link"><span class="sl-no">03</span><span class="sl-txt">技能</span><span class="sl-cur">▋</span></a>
+      <a href="#logs"     class="side-link"><span class="sl-no">04</span><span class="sl-txt">经历</span><span class="sl-cur">▋</span></a>
+      <a href="#projects" class="side-link"><span class="sl-no">05</span><span class="sl-txt">项目</span><span class="sl-cur">▋</span></a>
+      <a href="#terminal" class="side-link"><span class="sl-no">06</span><span class="sl-txt">终端</span><span class="sl-cur">▋</span></a>
+      <a href="#uplink"   class="side-link"><span class="sl-no">07</span><span class="sl-txt">联系</span><span class="sl-cur">▋</span></a>
+    </nav>
+
+    <div class="side-foot">
+      <button class="sound-toggle" id="soundToggle" type="button"
+              aria-pressed="true" title="开启 / 关闭点击音效">
+        <span class="st-icon">♪</span><span class="st-text">音效 开</span>
+      </button>
+      <div class="sys-clock"><span class="led"></span><span id="clock">--:--:--</span></div>
+    </div>
+  </aside>
+  <div class="side-backdrop" id="sideBackdrop" hidden></div>
+
+  <!-- ============ 移动端顶栏（抽屉开关） ============ -->
+  <header class="mob-bar">
+    <button class="menu-btn" id="menuBtn" type="button"
+            aria-label="打开导航菜单" aria-expanded="false" aria-controls="sidebar">
+      <span class="mb-ico">☰</span><span class="mb-txt">菜单</span>
+    </button>
+    <span class="mob-brand">左恩东<span class="brand-dot">::</span>终端</span>
+  </header>
+
+  <main class="container">
+
+    <!-- ============ 首屏：身份终端 ============ -->
+    <section class="hero panel" id="home">
+      <p class="hud-label">系统·首页 &nbsp;/&nbsp; 身份档案 &nbsp;/&nbsp; <span id="hudDate">----</span></p>
+
+      <div class="hero-id">
+        <div class="hero-text">
+          <p class="kicker">&gt; 正在读取身份档案…</p>
+          <h1 class="glitch" data-text="左恩东">左恩东</h1>
+          <p class="typed-line">
+            <span class="prompt-sign">$</span>
+            <span id="typed"></span><span class="cursor">▋</span>
+          </p>
+        </div>
+
+        <!-- 科技粒子头像框：Canvas 轨道粒子 + 双层旋转环 + 扫描光 + 四角 HUD 括号 -->
+        <div class="avatar-wrap" id="avatarWrap">
+          <canvas class="avatar-fx" id="avatarFx" aria-hidden="true"></canvas>
+          <span class="av-ring av-ring-dashed" aria-hidden="true"></span>
+          <span class="av-ring av-ring-conic" aria-hidden="true"></span>
+          <span class="av-corner av-c-tl" aria-hidden="true"></span>
+          <span class="av-corner av-c-tr" aria-hidden="true"></span>
+          <span class="av-corner av-c-bl" aria-hidden="true"></span>
+          <span class="av-corner av-c-br" aria-hidden="true"></span>
+          <div class="avatar-inner">
+            <img class="avatar-img" src="assets/avatar.jpg" alt="左恩东的头像" width="800" height="800" />
+            <span class="av-scan" aria-hidden="true"></span>
+          </div>
+          <span class="av-status"><i></i>身份已核验</span>
+        </div>
+      </div>
+
+      <div class="hero-meta">
+        <div class="meta-item"><span class="meta-k">当前状态</span><span class="meta-v">上师大 · 计科 · 大三在读</span></div>
+        <div class="meta-item"><span class="meta-k">主攻方向</span><span class="meta-v">AI 应用 · 深度学习</span></div>
+        <div class="meta-item"><span class="meta-k">学习模式</span><span class="meta-v">用 AI 重塑学习方式</span></div>
+      </div>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#uplink">&gt; 与我取得联系</a>
+        <a class="btn btn-ghost" href="#terminal">&gt; 打开交互终端</a>
+      </div>
+
+      <div class="scroll-hint">向下滚动，展开完整档案 <span class="scroll-arrow">↓</span></div>
+    </section>
+
+    <!-- ============ 01 关于我：系统档案 ============ -->
+    <section class="section" id="about">
+      <header class="sec-head reveal">
+        <span class="sec-no">01</span>
+        <h2>// 关于我</h2>
+        <span class="sec-sub">认识这个节点 · 档案读取中</span>
+      </header>
+
+      <div class="grid-2 reveal">
+        <article class="panel spec-panel">
+          <h3 class="panel-title"><span class="square">■</span> 身份参数</h3>
+          <dl class="spec-list">
+            <div class="spec-row"><dt>姓名</dt><dd>左恩东</dd></div>
+            <div class="spec-row"><dt>学校</dt><dd>上海师范大学 · 信息与机电工程学院</dd></div>
+            <div class="spec-row"><dt>专业</dt><dd>计算机科学与技术（大三）</dd></div>
+            <div class="spec-row"><dt>现任职务</dt><dd>班级生活委员</dd></div>
+            <div class="spec-row"><dt>关注方向</dt><dd>AI 应用开发 / 深度学习</dd></div>
+            <div class="spec-row"><dt>兴趣爱好</dt><dd>游戏 / 剧本杀 / 电影 / 旅行 / 美食</dd></div>
+            <div class="spec-row"><dt>学习风格</dt><dd>深度研究型，喜欢把问题拆到底</dd></div>
+          </dl>
+        </article>
+
+        <article class="panel bio-panel">
+          <h3 class="panel-title"><span class="square">■</span> 自我介绍</h3>
+          <p class="bio-text">
+            你好，我是左恩东，上海师范大学信息与机电工程学院计算机科学与技术专业的大三学生。
+            我相信 AI 会重塑学习和创造的方式——所以我把大模型当作"随问随答的助教"，
+            一边用，一边琢磨它背后的深度学习原理。现在还在打基础、攒作品的阶段，
+            不着急，但很认真。学习之外，游戏、剧本杀、电影、旅行和美食，
+            是我给生活充电的几种方式。
+          </p>
+          <div class="bio-tags">
+            <span class="tag">[ AI优先 ]</span>
+            <span class="tag">[ 深度学习 ]</span>
+            <span class="tag">[ 生活委员 ]</span>
+            <span class="tag">[ 剧本杀玩家 ]</span>
+            <span class="tag">[ 美食雷达 ]</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 02 技能栈：模块矩阵 ============ -->
+    <section class="section" id="stack">
+      <header class="sec-head reveal">
+        <span class="sec-no">02</span>
+        <h2>// 技能栈</h2>
+        <span class="sec-sub">已加载的能力模块</span>
+      </header>
+
+      <div class="stack-grid">
+        <article class="panel stack-group reveal">
+          <h3 class="panel-title"><span class="square">▣</span> 编程语言</h3>
+          <p class="stack-note">// 计算机底座</p>
+          <div class="tag-cloud">
+            <span class="tag">C</span><span class="tag">Python</span><span class="tag">Java</span>
+            <span class="tag">数据结构</span><span class="tag">算法</span>
+          </div>
+        </article>
+
+        <article class="panel stack-group reveal">
+          <h3 class="panel-title"><span class="square">▣</span> 人工智能</h3>
+          <p class="stack-note">// 正在点亮的方向</p>
+          <div class="tag-cloud">
+            <span class="tag hot">深度学习</span><span class="tag hot">提示词工程</span>
+            <span class="tag">AI 辅助编程</span><span class="tag">AI 应用开发</span>
+          </div>
+        </article>
+
+        <article class="panel stack-group reveal">
+          <h3 class="panel-title"><span class="square">▣</span> 数学基础</h3>
+          <p class="stack-note">// 思维地基</p>
+          <div class="tag-cloud">
+            <span class="tag">高等数学</span><span class="tag">线性代数</span>
+            <span class="tag">概率论</span><span class="tag">离散数学</span>
+          </div>
+        </article>
+
+        <article class="panel stack-group reveal">
+          <h3 class="panel-title"><span class="square">▣</span> 工具装备</h3>
+          <p class="stack-note">// 日常装备</p>
+          <div class="tag-cloud">
+            <span class="tag">Git</span><span class="tag">Linux 基础</span>
+            <span class="tag">AI 编程助手</span><span class="tag">LaTeX</span>
+            <!-- 待替换：按你的真实技能增删标签 -->
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 03 经历：版本更新日志 ============ -->
+    <section class="section" id="logs">
+      <header class="sec-head reveal">
+        <span class="sec-no">03</span>
+        <h2>// 成长日志</h2>
+        <span class="sec-sub">像软件版本一样记录自己</span>
+      </header>
+
+      <div class="changelog">
+        <article class="log-entry reveal">
+          <div class="log-version">v2026.10</div>
+          <div class="log-body">
+            <h3 class="log-title">[ 当前版本 ] 大三进行时</h3>
+            <p class="log-desc">一边深耕专业基础，一边探索 AI 辅助编程与深度学习，尝试用大模型重塑自己的学习和创作流程；同时担任班级生活委员，为同学们打理日常。</p>
+            <div class="log-tags"><span>#AI应用</span><span>#深度学习</span><span>#生活委员</span></div>
+          </div>
+        </article>
+
+        <article class="log-entry reveal">
+          <div class="log-version">v2025.09</div>
+          <div class="log-body">
+            <h3 class="log-title">班级生活委员就任</h3>
+            <p class="log-desc">开始在班级担任生活委员：班费管理、活动物资、同学的日常需求——把琐碎的事情做得井井有条，也是一种能力修炼。</p>
+            <div class="log-tags"><span>#生活委员</span><span>#班级服务</span></div>
+          </div>
+        </article>
+
+        <article class="log-entry reveal">
+          <div class="log-version">v2024.09</div>
+          <div class="log-body">
+            <h3 class="log-title">大一 · 院学生会社团部</h3>
+            <p class="log-desc">入学后加入信息与机电工程学院学生会社团部，参与社团活动的组织与服务，在真实的协作里迈出了大学生活的第一步。</p>
+            <div class="log-tags"><span>#学生会</span><span>#社团部</span><span>#起点</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 04 项目：文件目录 ============ -->
+    <section class="section" id="projects">
+      <header class="sec-head reveal">
+        <span class="sec-no">04</span>
+        <h2>// 项目仓库</h2>
+        <span class="sec-sub">我建造过的东西</span>
+      </header>
+
+      <div class="panel file-tree reveal">
+        <div class="tree-row">
+          <span class="tree-icon">📁</span>
+          <div>
+            <h3 class="tree-name">个人终端主页 <span class="tree-branch">[v1.0]</span></h3>
+            <p class="tree-desc">纯手工打造的个人终端 —— HTML / CSS / JavaScript 零依赖单页，内置可接入大模型的交互终端。</p>
+          </div>
+          <span class="tree-status live">状态：已上线</span>
+        </div>
+        <div class="tree-row">
+          <span class="tree-icon">📁</span>
+          <div>
+            <h3 class="tree-name">AI 应用作品集 <span class="tree-branch">[主分支]</span></h3>
+            <p class="tree-desc">// 规划中：把课程作业和 AI 实验整理成可展示的作品，这里是它们未来的家。</p>
+          </div>
+          <span class="tree-status">状态：规划中</span>
+        </div>
+        <div class="tree-row">
+          <span class="tree-icon">📁</span>
+          <div>
+            <h3 class="tree-name">下一个项目 <span class="tree-branch">[NULL]</span></h3>
+            <p class="tree-desc">// 下一个项目还没想好做什么，但仓库已经建好了——有想法就会填进来。</p>
+          </div>
+          <span class="tree-status">状态：待建设</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 终端：用命令认识我 ============ -->
+    <section class="section" id="terminal">
+      <header class="sec-head reveal">
+        <span class="sec-no">05</span>
+        <h2>// 交互终端</h2>
+        <span class="sec-sub">输入中文命令与我对话（输入「帮助」查看全部指令）</span>
+      </header>
+
+      <div class="panel terminal reveal" id="termApp">
+        <div class="term-bar">
+          <span class="term-title">命令终端 — 在这里用指令认识左恩东</span>
+          <span class="term-blink">● 在线</span>
+        </div>
+        <div class="term-output" id="termOutput"></div>
+        <div class="term-input-line">
+          <span class="term-prompt">请输入命令 &gt;</span>
+          <input type="text" id="termInput" autocomplete="off" spellcheck="false"
+                 maxlength="120" aria-label="终端命令输入框" placeholder="输入「帮助」后回车…" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 联系：建立上行链路 ============ -->
+    <section class="section" id="uplink">
+      <header class="sec-head reveal">
+        <span class="sec-no">06</span>
+        <h2>// 联系我</h2>
+        <span class="sec-sub">欢迎建立一条连接</span>
+      </header>
+
+      <div class="uplink-grid">
+        <a class="panel uplink-item reveal" href="mailto:1792281449@qq.com">
+          <span class="up-key">通道一 · 电子邮箱</span>
+          <span class="up-val">1792281449@qq.com</span>
+          <span class="up-hint">[ 点击即可发邮件 ]</span>
+        </a>
+        <a class="panel uplink-item reveal" href="tel:18016261462">
+          <span class="up-key">通道二 · 电话</span>
+          <span class="up-val">18016261462</span>
+          <span class="up-hint">[ 点击即可拨打电话 ]</span>
+        </a>
+        <a class="panel uplink-item reveal" href="#terminal">
+          <span class="up-key">通道三 · 终端对话</span>
+          <span class="up-val">直接在终端里找我聊聊</span>
+          <span class="up-hint">[ 回到交互终端 ]</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>// 信号传输结束 — 左恩东 © <span id="year">2026</span> — 从零手写，未使用任何框架</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
